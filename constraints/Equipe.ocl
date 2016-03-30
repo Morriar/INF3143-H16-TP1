@@ -1,0 +1,29 @@
+package inf3143::tp1
+
+context Equipe
+
+	-- Une équipe a un nom possédant entre 6 et 12 caractères.
+	inv: nom.size() >= 6 and nom.size() <= 12
+
+	-- Une équipe à doit toujours avoir un chef.
+	inv: chef <> null
+	
+	-- Le chef d’une équipe doit être inscrit dans cette équipe.
+	inv: chef.equipe = self
+	
+	-- Une équipe comprend entre 3 et 8 personnages.
+	inv: personnages->size() >= 3 and personnages->size() <= 8
+
+	-- Une équipe doit comprendre au moins un personnage portant une arme.
+	inv: personnages->exists(p | p.arme <> null)
+	
+	-- Une équipe doit avoir au moins un prêtre, un guerrier et un mage.
+	inv: personnages->exists(p | p.metier.oclIsKindOf(Pretre))
+	 and personnages->exists(p | p.metier.oclIsKindOf(Guerrier))
+	 and personnages->exists(p | p.metier.oclIsKindOf(Mage))
+	 
+context Equipe::estMorte(): Boolean
+	-- Une équipe est morte si tous ses membres sont morts.
+	body: if personnages.forAll(p | p.estMort()) then true else false endif
+
+endpackage 

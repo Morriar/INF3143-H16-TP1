@@ -1,0 +1,18 @@
+package inf3143::tp1
+
+context Arme
+	-- Une arme peut avoir entre 0 et 3 enchantements.
+	inv: enchantements->size() >= 0 and enchantements->size() <= 3
+
+	-- Les points de dommages d’une arme sont supérieurs ou égal à 0.
+	inv: dommages >= 0
+	
+	-- Une arme ne peut avoir d’enchantements que si elle est portée par un personnage.
+	inv: enchantements->notEmpty() implies Personnage.allInstances().exists(arme = self)
+	
+context Arme::getDommages(): Integer
+
+	-- La méthode getDommages() calcule les dommages infligés par l’arme avec ses enchantements.
+	body: dommages + enchantements->collect(bonus)->sum()
+
+endpackage 

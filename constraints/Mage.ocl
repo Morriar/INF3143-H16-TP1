@@ -1,0 +1,32 @@
+package inf3143::tp1
+
+context Mage
+
+	-- Mage est une classe singleton.
+	inv: Mage.allInstances()->size() = 1
+
+-- Un mage utilise ses points de mana pour les transformer en dommages infligés à un adversaire.
+context Mage::lancerSort(mage: Personnage, cible: Personnage, mana: Integer)
+
+	-- Seuls les mages peuvent lancer des sorts.
+	pre: mage.metier.oclIsKindOf(Mage)
+
+	-- Un mage ne peut pas se lancer un sort à lui même.
+	pre: mage <> cible
+	
+	-- Un mage ne peut pas lancer un sort à un personnage membre de son équipe.
+	pre: mage.equipe.personnages->excludes(cible)
+	
+	-- `mana` doit être strictement suppérieur à 0.
+	pre: mana > 0
+	
+	-- `mana` doit être inférieur ou égal à la quantité de mana dont dispose le mage.
+	pre: mana <= mage.mana
+	
+	-- Lancer un sort diminue la mana du mage du nombre de points de mana utilisés.
+	post: mage.mana = mage@pre.mana - mana
+	
+	-- Lancer un sort diminue la vie de la cible du nombre de points de mana utilisés.
+	post: cible.vie = cible@pre.vie - mana
+
+endpackage 

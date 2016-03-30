@@ -1,0 +1,23 @@
+package inf3143::tp1
+
+context Guerrier
+
+	-- Guerrier est une classe singleton.
+	inv: Guerrier.allInstances()->size() = 1
+
+-- Un guerrier peut rentrer en mode berserk et échanger des points de mana contre des points de force.
+context Guerrier::berserk(guerrier: Personnage, mana: Integer)
+
+	-- Seuls les guerriers peuvent rentrer en mode berserk.
+	pre: guerrier.metier.oclIsKindOf(Guerrier)
+
+	-- Le nombre de points de mana sacrifiés par le guerrier doit être structement suppérieur à 0.
+	pre: mana > 0
+	
+	-- Le nombre de points de mana sacrifiés par le guerrier doit être inférieur ou égal à la quantité de mana dont il dispose.
+	pre: mana <= guerrier.mana
+	
+	-- La force du guerrier est augmenté du nombre de points de mana dépensés.
+	post: guerrier.force = guerrier@pre.force + mana
+	
+endpackage 

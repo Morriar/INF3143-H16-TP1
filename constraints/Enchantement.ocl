@@ -1,0 +1,15 @@
+package inf3143::tp1
+
+context Enchantement
+
+	-- Un enchantement est toujours rattaché à une arme et cette arme doit être équipée par un personnage. Sinon l’enchantement ne devrait pas exister.
+	-- Note: On vérifie déjà dans le contexte de l'Arme que l'arme est bien portée.
+	inv: Arme.allInstances().exists(a | a.includes(self))
+
+endpackage
+
+context Enchantement::getBonus(): Integer
+	-- getBonus() retourne le bonus de dommage ajouté par l’enchantement.
+	body: bonus
+
+endpackage

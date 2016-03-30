@@ -1,0 +1,36 @@
+package inf3143::tp1
+
+context Pretre
+
+	-- Pretre est une classe singleton.
+	inv: Pretre.allInstances()->size() = 1
+
+-- Un prêtre soigne un personnage en transformant une partie de sa mana en points de vie.
+context Pretre::soigner(pretre: Personnage, cible: Personnage, mana: Integer)
+
+	-- Seuls les prêtres peuvent soigner.
+	pre: pretre.metier.oclIsKindOf(Pretre)
+
+	-- Un prêtre ne peut pas se soigner lui même.
+	pre: pretre <> cible
+	
+	-- Un prêtre ne peut soigner que des membres de son équipe.
+	pre: pretre.equipe.personnages->includes(cible)
+	
+	-- Un prêtre ne peut pas soigner un personnage déjà mort.
+	pre: cible.vie > 0
+	
+	-- Le nombre de points de mana transformés doit être strictement supérieur à 0.
+	-- Le nombre de points de mana transformés ne peut pas être supérieur au nombre de points de mana du prêtre.
+	pre: mana > 0 and mana <= pretre.mana 
+	
+	-- Un prêtre ne peut pas soigner un personnage au delà de 100 points de vie.
+	post: cible.vie <= 100
+	
+	-- Grâce au soin, la cible gagne autant de points de vie que de points de mana dépensés par le prêtre.
+	post: if cible.vie = cible@pre.vie + mana
+	
+	-- Le prêtre perd autant de points de mana que de dépensés pour le soin.
+	post: pretre.mana = pretre@pre.mana - mana
+
+endpackage 

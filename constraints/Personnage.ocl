@@ -1,0 +1,68 @@
+package inf3143::tp1
+
+context Personnage
+
+	-- Le nom d’un personnage doit faire entre 3 et 12 caractères et ne doit pas correspondre aux chaînes “GOD”, “TEST” ou “ADMIN” (minuscules ou majuscules).
+	inv: nom.size() >= 3 and nom.size() <= 12
+	 and nom.toUpperCase() <> 'GOD'
+	 and nom.toUpperCase() <> 'ADMIN'
+	 and nom.toUpperCase() <> 'TEST'
+	 
+	-- Un personnage peut avoir entre 0 et 100 pv.
+	inv: vie >= 0 and vie <= 100
+	
+	-- Un personnage possède une force strictement supérieure à 0.
+	inv: force > 0
+	
+	-- Un personnage a forcément un métier.
+	inv: metier <> null 
+	
+	-- Les prêtres ne peuvent pas porter d’armes, ils ne font que soigner.
+	inv: metier.oclIsKindOf(Pretre) implies arme = null
+	
+	-- Les mages ne peuvent pas porter d’armes à deux mains.
+	inv: metier.oclIsKindOf(Mage) implies not arme.aDeuxMains
+
+	-- Deux personnages ne peuvent avoir le même nom.
+	inv: Personnage.allInstances()->forAll(p1, p2 | p1 <> p2 implies p1.nom <> p2.nom)
+
+	-- Un personnage ne peut pas être dans deux équipes en même temps.
+	inv: Equipe.allInstances()->forAll(e1, e2 |
+		e1.personnages->includes(self) implies e2.personnages->excludes(self))
+
+context Personnage::estMort(): Boolean
+
+	-- estMort() retourne vrai si la vie du personnage est égale à 0.
+	body: if vie = 0 then true else false endif
+	
+-- La méthode blesser() permet de blesser un personnage.
+context Personnage::blesser(dommages: Integer)
+
+	-- Elle prend en paramètre un nombre de points de dommages à retirer (toujours positif)
+	pre: dommages >= 0
+	
+	-- Elle soustrait les points à la valeur de `vie` du personnage.
+	post: vie = vie@pre - dommages 
+
+-- La méthode attaque() permet d’attaquer un personnage.
+context Personnage::attaquer(personnage: Personnage)
+
+	-- Un personnage ne peut attaquer un autre personnage que s’il dispose d’une arme.
+	pre: self.arme <> null
+	
+	-- Un personnage ne peut s’attaquer lui-même.
+	pre: self <> personnage
+	
+	-- Un personnage, ne peut attaquer un membre de son équipe.
+	pre: self.equipe.personnages->excludes(personnage)
+
+	-- Une attaque retire (attaquant.force + attaquant.arme.getDomages()) aux points de vie de la cible.
+	-- Il est possible d’attaquer un personnage mort mais cela ne lui retire pas de points de vie.
+	post: if personnage@pre.vie = 0 then
+			personnage.vie = 0
+		  else
+		  	let dmg = force + arme.enchantements->collect(bonus)->sum()
+		  	in personnage.vie = personnage@pre.vie - dmg
+		  endif 
+
+endpackage 
